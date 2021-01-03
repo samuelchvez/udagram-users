@@ -1,4 +1,5 @@
 import {Router, Request, Response} from 'express';
+import { v4 } from 'uuid';
 
 import {User} from '../models/User';
 import * as c from '../../../../config/config';
@@ -49,51 +50,66 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
 router.get('/verification',
     requireAuth,
     async (req: Request, res: Response) => {
+      const pid = v4();
+      console.log(`START - GET - ${new Date().toLocaleString()} - ${pid} - /users/verification`);
+      console.log(`END - GET - ${new Date().toLocaleString()} - ${pid} - /users/verification`);
       return res.status(200).send({auth: true, message: 'Authenticated.'});
     });
 
 router.post('/login', async (req: Request, res: Response) => {
+  const pid = v4();
+  console.log(`START - POST - ${new Date().toLocaleString()} - ${pid} - /users/login`);
   const email = req.body.email;
   const password = req.body.password;
 
   if (!email || !EmailValidator.validate(email)) {
+    console.log(`END - POST - ${new Date().toLocaleString()} - ${pid} - /users/login`);
     return res.status(400).send({auth: false, message: 'Email is required or malformed.'});
   }
 
   if (!password) {
+    console.log(`END - POST - ${new Date().toLocaleString()} - ${pid} - /users/login`);
     return res.status(400).send({auth: false, message: 'Password is required.'});
   }
 
   const user = await User.findByPk(email);
   if (!user) {
+    console.log(`END - POST - ${new Date().toLocaleString()} - ${pid} - /users/login`);
     return res.status(401).send({auth: false, message: 'User was not found..'});
   }
 
   const authValid = await comparePasswords(password, user.passwordHash);
 
   if (!authValid) {
+    console.log(`END - POST - ${new Date().toLocaleString()} - ${pid} - /users/login`);
     return res.status(401).send({auth: false, message: 'Password was invalid.'});
   }
 
   const jwt = generateJWT(user);
+  console.log(`END - POST - ${new Date().toLocaleString()} - ${pid} - /users/login`);
   res.status(200).send({auth: true, token: jwt, user: user.short()});
 });
 
 
 router.post('/', async (req: Request, res: Response) => {
+  const pid = v4();
+  console.log(`START - POST - ${new Date().toLocaleString()} - ${pid} - /users`);
   const email = req.body.email;
   const plainTextPassword = req.body.password;
 
   if (!email || !EmailValidator.validate(email)) {
+    console.log(`END - POST - ${new Date().toLocaleString()} - ${pid} - /users`);
     return res.status(400).send({auth: false, message: 'Email is missing or malformed.'});
   }
 
   if (!plainTextPassword) {
+    console.log(`END - POST - ${new Date().toLocaleString()} - ${pid} - /users`);
     return res.status(400).send({auth: false, message: 'Password is required.'});
   }
 
   const user = await User.findByPk(email);
   if (user) {
+    console.log(`END - POST - ${new Date().toLocaleString()} - ${pid} - /users`);
     return res.status(422).send({auth: false, message: 'User already exists.'});
   }
 
@@ -108,6 +124,7 @@ router.post('/', async (req: Request, res: Response) => {
 
 
   const jwt = generateJWT(savedUser);
+  console.log(`END - POST - ${new Date().toLocaleString()} - ${pid} - /users`);
   res.status(201).send({token: jwt, user: savedUser.short()});
 });
 
