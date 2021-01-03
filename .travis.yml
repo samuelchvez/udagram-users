@@ -14,6 +14,7 @@ before_script:
   - echo "no tests"
 
 script:
+  - "echo \"POSTGRES_USERNAME=$POSTGRES_USERNAME\nPOSTGRES_PASSWORD=$POSTGRES_PASSWORD\nPOSTGRES_HOST=$POSTGRES_HOST\nPOSTGRES_DB=$POSTGRES_DB\nJWT_SECRET=$JWT_SECRET\nALLOW_REQUESTS_FROM_URL=$ALLOW_REQUESTS_FROM_URL\" >> .env"
   - docker --version # print the version for logging
   - docker build -t udagram-users .
   - docker tag udagram-users schavezfuentes/udagram-users:latest
